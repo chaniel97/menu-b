@@ -24,6 +24,7 @@ interface DishCardProps {
   onAddToOrder: (dish: Dish) => void;
   onDelete: (dish: Dish) => void;
   onToggleSelect: (id: number) => void;
+  onOpen: (dish: Dish) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -42,15 +43,16 @@ export default function DishCard({
   onAddToOrder,
   onDelete,
   onToggleSelect,
+  onOpen,
 }: DishCardProps) {
   const tagColor = CATEGORY_COLORS[dish.category] || "bg-gray-100 text-gray-600";
 
   return (
     <div
       className={`bg-white rounded-card shadow-card overflow-hidden flex flex-col transition-all ${
-        selectMode ? "cursor-pointer" : ""
+        selectMode ? "cursor-pointer" : "cursor-pointer hover:shadow-card-hover"
       } ${selected ? "ring-2 ring-[#e8637a]" : ""}`}
-      onClick={selectMode ? () => onToggleSelect(dish.id) : undefined}
+      onClick={selectMode ? () => onToggleSelect(dish.id) : () => onOpen(dish)}
     >
       <div className="relative w-full h-44 bg-[#f5ede3]">
         {dish.photoPath ? (
@@ -67,7 +69,7 @@ export default function DishCard({
           </div>
         )}
 
-        {selectMode ? (
+        {selectMode && (
           <div className="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-white shadow flex items-center justify-center bg-white">
             {selected ? (
               <span className="w-5 h-5 rounded-full bg-[#e8637a] flex items-center justify-center text-white text-xs">✓</span>
@@ -75,14 +77,6 @@ export default function DishCard({
               <span className="w-5 h-5 rounded-full border-2 border-gray-300 block" />
             )}
           </div>
-        ) : (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(dish); }}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-colors text-sm shadow-sm"
-            aria-label="Delete dish"
-          >
-            ✕
-          </button>
         )}
       </div>
 

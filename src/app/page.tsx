@@ -6,6 +6,7 @@ import CategoryFilter from "./components/CategoryFilter";
 import AddDishModal from "./components/AddDishModal";
 import OrderDrawer from "./components/OrderDrawer";
 import ConfirmModal from "./components/ConfirmModal";
+import DishDetailModal from "./components/DishDetailModal";
 
 export default function MenuPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -16,7 +17,10 @@ export default function MenuPage() {
   const [showOrder, setShowOrder] = useState(false);
   const [orderItems, setOrderItems] = useState<Dish[]>([]);
 
-  // delete confirmation
+  // detail modal
+  const [activeDish, setActiveDish] = useState<Dish | null>(null);
+
+  // delete confirmation (bulk only — single delete lives in detail modal)
   const [pendingDelete, setPendingDelete] = useState<Dish | null>(null);
 
   // multi-select delete
@@ -183,6 +187,7 @@ export default function MenuPage() {
                 onAddToOrder={handleAddToOrder}
                 onDelete={(d) => setPendingDelete(d)}
                 onToggleSelect={handleToggleSelect}
+                onOpen={(d) => setActiveDish(d)}
               />
             ))}
           </div>
@@ -249,6 +254,22 @@ export default function MenuPage() {
           confirmLabel={`Delete ${selectedIds.size}`}
           onConfirm={confirmBulkDelete}
           onCancel={() => setPendingBulkDelete(false)}
+        />
+      )}
+
+      {activeDish && (
+        <DishDetailModal
+          dish={activeDish}
+          onClose={() => setActiveDish(null)}
+          onUpdated={(updated) => {
+            setDishes((prev) => prev.map((d) => d.id === updated.id ? updated : d));
+            setActiveDish(updated);
+          }}
+          onDeleted={(id) => {
+            setDishes((prev) => prev.filter((d) => d.id !== id));
+            setOrderItems((prev) => prev.filter((d) => d.id !== id));
+            setActiveDish(null);
+          }}
         />
       )}
     </div>

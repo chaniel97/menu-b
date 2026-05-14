@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Dish } from "./DishCard";
 
 interface OrderDrawerProps {
@@ -67,12 +68,19 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
               {items.map((dish) => (
                 <li
                   key={dish.id}
-                  className="flex items-center justify-between bg-white rounded-card px-4 py-3 shadow-card"
+                  className="flex items-center gap-3 bg-white rounded-card px-3 py-2.5 shadow-card"
                 >
-                  <span className="font-medium text-gray-800 text-sm">{dish.name}</span>
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#f5ede3]">
+                    {dish.photoPath ? (
+                      <Image src={dish.photoPath} alt={dish.name} fill className="object-cover" sizes="48px" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xl">🍽️</div>
+                    )}
+                  </div>
+                  <span className="font-medium text-gray-800 text-sm flex-1">{dish.name}</span>
                   <button
                     onClick={() => onRemove(dish.id)}
-                    className="text-gray-400 hover:text-red-400 transition-colors text-sm ml-2"
+                    className="text-gray-400 hover:text-red-400 transition-colors text-sm flex-shrink-0"
                   >
                     ✕
                   </button>
