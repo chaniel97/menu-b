@@ -301,7 +301,7 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
 
                 <button
                   onClick={handleSave}
-                  disabled={saving || uploading || !name.trim()}
+                  disabled={saving || compressing || !name.trim()}
                   className="w-full py-3 bg-[#e8637a] text-white font-semibold rounded-card hover:bg-[#c94860] transition-colors disabled:opacity-50 shadow-fab"
                 >
                   {saving ? "Saving…" : "Save changes 💕"}

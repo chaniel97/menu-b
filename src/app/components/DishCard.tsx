@@ -106,7 +106,7 @@ export default function DishCard({
 
         {!selectMode && (
           <button
-            onClick={() => onAddToOrder(dish)}
+            onClick={(e) => { e.stopPropagation(); onAddToOrder(dish); }}
             className={`mt-auto w-full py-2 rounded-card text-sm font-semibold transition-all ${
               inOrder
                 ? "bg-[#f9d5db] text-[#c94860] border border-[#e8637a]"
