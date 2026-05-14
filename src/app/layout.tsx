@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Her Kitchen 💕",
-  description: "A personal menu app for the dishes I love",
+  title: "MenuB",
+  description: "A personal food menu app",
 };
 
 export const viewport: Viewport = {

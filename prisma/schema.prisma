@@ -15,7 +15,8 @@ model Dish {
   cuisine     String?
   rating      Int      @default(3)
   photoPath   String?
-  notes       String?
-  createdAt   DateTime @default(now())
+  notes         String?
+  requestCount  Int      @default(0)
+  createdAt     DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

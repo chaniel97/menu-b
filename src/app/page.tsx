@@ -5,14 +5,24 @@ import DishCard, { Dish } from "./components/DishCard";
 import CategoryFilter from "./components/CategoryFilter";
 import AddDishModal from "./components/AddDishModal";
 import OrderDrawer from "./components/OrderDrawer";
+import ConfirmModal from "./components/ConfirmModal";
 
 export default function MenuPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState("All");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [showOrder, setShowOrder] = useState(false);
   const [orderItems, setOrderItems] = useState<Dish[]>([]);
+
+  // delete confirmation
+  const [pendingDelete, setPendingDelete] = useState<Dish | null>(null);
+
+  // multi-select delete
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [pendingBulkDelete, setPendingBulkDelete] = useState(false);
 
   const fetchDishes = useCallback(async () => {
     const res = await fetch("/api/dishes");
@@ -25,8 +35,15 @@ export default function MenuPage() {
     fetchDishes();
   }, [fetchDishes]);
 
-  const filtered =
-    category === "All" ? dishes : dishes.filter((d) => d.category === category);
+  const filtered = dishes.filter((d) => {
+    const matchesCategory = categories.length === 0 || categories.includes(d.category);
+    const matchesSearch =
+      !search.trim() ||
+      d.name.toLowerCase().includes(search.toLowerCase()) ||
+      d.description?.toLowerCase().includes(search.toLowerCase()) ||
+      d.cuisine?.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   function handleAddToOrder(dish: Dish) {
     setOrderItems((prev) =>
@@ -38,38 +55,101 @@ export default function MenuPage() {
     setOrderItems((prev) => prev.filter((d) => d.id !== id));
   }
 
-  async function handleDelete(id: number) {
-    await fetch(`/api/dishes/${id}`, { method: "DELETE" });
-    setDishes((prev) => prev.filter((d) => d.id !== id));
-    setOrderItems((prev) => prev.filter((d) => d.id !== id));
+  function handleToggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    await fetch(`/api/dishes/${pendingDelete.id}`, { method: "DELETE" });
+    setDishes((prev) => prev.filter((d) => d.id !== pendingDelete.id));
+    setOrderItems((prev) => prev.filter((d) => d.id !== pendingDelete.id));
+    setPendingDelete(null);
+  }
+
+  async function confirmBulkDelete() {
+    await Promise.all(
+      [...selectedIds].map((id) => fetch(`/api/dishes/${id}`, { method: "DELETE" }))
+    );
+    setDishes((prev) => prev.filter((d) => !selectedIds.has(d.id)));
+    setOrderItems((prev) => prev.filter((d) => !selectedIds.has(d.id)));
+    setSelectedIds(new Set());
+    setSelectMode(false);
+    setPendingBulkDelete(false);
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelectedIds(new Set());
   }
 
   return (
-    <div className="flex flex-col min-h-dvh pb-24">
+    <div className="flex flex-col min-h-dvh pb-28">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-[#fdf8f3]/90 backdrop-blur-md px-4 pt-5 pb-3 border-b border-[#f0e4d8]">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="font-playfair text-2xl font-bold text-gray-800 leading-tight">
-              Her Kitchen 💕
+              MenuB
             </h1>
             <p className="text-xs text-gray-400 mt-0.5">
               {dishes.length} {dishes.length === 1 ? "dish" : "dishes"} saved
             </p>
           </div>
-          {orderItems.length > 0 && (
+          <div className="flex items-center gap-2">
+            {selectMode ? (
+              <button
+                onClick={exitSelectMode}
+                className="text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors px-2"
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="text-sm font-semibold text-gray-500 hover:text-[#e8637a] transition-colors px-2"
+              >
+                Select
+              </button>
+            )}
+            {!selectMode && orderItems.length > 0 && (
+              <button
+                onClick={() => setShowOrder(true)}
+                className="flex items-center gap-1.5 bg-[#e8637a] text-white text-sm font-semibold px-3.5 py-2 rounded-pill shadow-fab hover:bg-[#c94860] transition-colors"
+              >
+                <span>Order</span>
+                <span className="bg-white text-[#e8637a] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
+                  {orderItems.length}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative mb-2">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search dishes, cuisine…"
+            className="w-full pl-9 pr-4 py-2 rounded-card bg-white border border-gray-200 text-sm focus:outline-none focus:border-[#e8637a] focus:ring-1 focus:ring-[#e8637a]/30 transition-colors"
+          />
+          {search && (
             <button
-              onClick={() => setShowOrder(true)}
-              className="relative flex items-center gap-1.5 bg-[#e8637a] text-white text-sm font-semibold px-3.5 py-2 rounded-pill shadow-fab hover:bg-[#c94860] transition-colors"
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
             >
-              <span>Order</span>
-              <span className="bg-white text-[#e8637a] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
-                {orderItems.length}
-              </span>
+              ✕
             </button>
           )}
         </div>
-        <CategoryFilter selected={category} onChange={setCategory} />
+
+        <CategoryFilter selected={categories} onChange={setCategories} />
       </header>
 
       {/* Grid */}
@@ -82,10 +162,12 @@ export default function MenuPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 mt-20 text-center">
             <span className="text-5xl">🍽️</span>
-            <p className="font-playfair text-xl font-semibold text-gray-700">No dishes yet</p>
+            <p className="font-playfair text-xl font-semibold text-gray-700">No dishes found</p>
             <p className="text-sm text-gray-400 max-w-xs">
-              {category !== "All"
-                ? `No ${category} dishes added. Try a different category or add one!`
+              {search
+                ? `No results for "${search}".`
+                : categories.length > 0
+                ? `No ${categories.join(" or ")} dishes yet.`
                 : "Tap the + button to add your first dish."}
             </p>
           </div>
@@ -96,32 +178,49 @@ export default function MenuPage() {
                 key={dish.id}
                 dish={dish}
                 inOrder={!!orderItems.find((d) => d.id === dish.id)}
+                selectMode={selectMode}
+                selected={selectedIds.has(dish.id)}
                 onAddToOrder={handleAddToOrder}
-                onDelete={handleDelete}
+                onDelete={(d) => setPendingDelete(d)}
+                onToggleSelect={handleToggleSelect}
               />
             ))}
           </div>
         )}
       </main>
 
-      {/* FAB — pinned bottom-right within the 420px column */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app pointer-events-none z-40">
-        <button
-          onClick={() => setShowAdd(true)}
-          className="absolute bottom-6 right-4 pointer-events-auto w-14 h-14 rounded-full bg-[#e8637a] text-white text-3xl flex items-center justify-center shadow-fab hover:bg-[#c94860] active:scale-95 transition-all"
-          aria-label="Add dish"
-        >
-          +
-        </button>
-      </div>
+      {/* FAB */}
+      {!selectMode && (
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app pointer-events-none z-40">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="absolute bottom-6 right-4 pointer-events-auto w-14 h-14 rounded-full bg-[#e8637a] text-white text-3xl flex items-center justify-center shadow-fab hover:bg-[#c94860] active:scale-95 transition-all"
+            aria-label="Add dish"
+          >
+            +
+          </button>
+        </div>
+      )}
+
+      {/* Bulk delete bar */}
+      {selectMode && (
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app z-40 px-4 pb-6 pt-3 bg-gradient-to-t from-[#fdf8f3] to-transparent">
+          <button
+            disabled={selectedIds.size === 0}
+            onClick={() => setPendingBulkDelete(true)}
+            className="w-full py-3 rounded-card bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-fab"
+          >
+            {selectedIds.size === 0
+              ? "Select dishes to delete"
+              : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "dish" : "dishes"}`}
+          </button>
+        </div>
+      )}
 
       {showAdd && (
         <AddDishModal
           onClose={() => setShowAdd(false)}
-          onAdded={() => {
-            setShowAdd(false);
-            fetchDishes();
-          }}
+          onAdded={() => { setShowAdd(false); fetchDishes(); }}
         />
       )}
 
@@ -129,7 +228,24 @@ export default function MenuPage() {
         <OrderDrawer
           items={orderItems}
           onRemove={handleRemoveFromOrder}
-          onClose={() => setShowOrder(false)}
+          onClose={() => { setShowOrder(false); fetchDishes(); }}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmModal
+          message={`Delete "${pendingDelete.name}"? This can't be undone.`}
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
+
+      {pendingBulkDelete && (
+        <ConfirmModal
+          message={`Delete ${selectedIds.size} ${selectedIds.size === 1 ? "dish" : "dishes"}? This can't be undone.`}
+          confirmLabel={`Delete ${selectedIds.size}`}
+          onConfirm={confirmBulkDelete}
+          onCancel={() => setPendingBulkDelete(false)}
         />
       )}
     </div>

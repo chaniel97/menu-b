@@ -12,14 +12,18 @@ export interface Dish {
   rating: number;
   photoPath: string | null;
   notes: string | null;
+  requestCount: number;
   createdAt: string;
 }
 
 interface DishCardProps {
   dish: Dish;
   inOrder: boolean;
+  selectMode: boolean;
+  selected: boolean;
   onAddToOrder: (dish: Dish) => void;
-  onDelete: (id: number) => void;
+  onDelete: (dish: Dish) => void;
+  onToggleSelect: (id: number) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -30,11 +34,24 @@ const CATEGORY_COLORS: Record<string, string> = {
   Dessert: "bg-pink-100 text-pink-700",
 };
 
-export default function DishCard({ dish, inOrder, onAddToOrder, onDelete }: DishCardProps) {
+export default function DishCard({
+  dish,
+  inOrder,
+  selectMode,
+  selected,
+  onAddToOrder,
+  onDelete,
+  onToggleSelect,
+}: DishCardProps) {
   const tagColor = CATEGORY_COLORS[dish.category] || "bg-gray-100 text-gray-600";
 
   return (
-    <div className="bg-white rounded-card shadow-card overflow-hidden flex flex-col transition-shadow hover:shadow-card-hover">
+    <div
+      className={`bg-white rounded-card shadow-card overflow-hidden flex flex-col transition-all ${
+        selectMode ? "cursor-pointer" : ""
+      } ${selected ? "ring-2 ring-[#e8637a]" : ""}`}
+      onClick={selectMode ? () => onToggleSelect(dish.id) : undefined}
+    >
       <div className="relative w-full h-44 bg-[#f5ede3]">
         {dish.photoPath ? (
           <Image
@@ -49,13 +66,24 @@ export default function DishCard({ dish, inOrder, onAddToOrder, onDelete }: Dish
             🍽️
           </div>
         )}
-        <button
-          onClick={() => onDelete(dish.id)}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-colors text-sm shadow-sm"
-          aria-label="Delete dish"
-        >
-          ✕
-        </button>
+
+        {selectMode ? (
+          <div className="absolute top-2 left-2 w-7 h-7 rounded-full border-2 border-white shadow flex items-center justify-center bg-white">
+            {selected ? (
+              <span className="w-5 h-5 rounded-full bg-[#e8637a] flex items-center justify-center text-white text-xs">✓</span>
+            ) : (
+              <span className="w-5 h-5 rounded-full border-2 border-gray-300 block" />
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(dish); }}
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-colors text-sm shadow-sm"
+            aria-label="Delete dish"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="p-3 flex flex-col gap-1.5 flex-1">
@@ -79,18 +107,27 @@ export default function DishCard({ dish, inOrder, onAddToOrder, onDelete }: Dish
           <p className="text-gray-500 text-sm leading-snug line-clamp-2">{dish.description}</p>
         )}
 
-        <StarRating value={dish.rating} readonly />
+        <div className="flex items-center justify-between">
+          <StarRating value={dish.rating} readonly />
+          {dish.requestCount > 0 && (
+            <span className="text-xs text-gray-400">
+              Requested {dish.requestCount}×
+            </span>
+          )}
+        </div>
 
-        <button
-          onClick={() => onAddToOrder(dish)}
-          className={`mt-auto w-full py-2 rounded-card text-sm font-semibold transition-all ${
-            inOrder
-              ? "bg-[#f9d5db] text-[#c94860] border border-[#e8637a]"
-              : "bg-[#e8637a] text-white hover:bg-[#c94860] shadow-sm"
-          }`}
-        >
-          {inOrder ? "✓ Added to request" : "+ Add to request"}
-        </button>
+        {!selectMode && (
+          <button
+            onClick={() => onAddToOrder(dish)}
+            className={`mt-auto w-full py-2 rounded-card text-sm font-semibold transition-all ${
+              inOrder
+                ? "bg-[#f9d5db] text-[#c94860] border border-[#e8637a]"
+                : "bg-[#e8637a] text-white hover:bg-[#c94860] shadow-sm"
+            }`}
+          >
+            {inOrder ? "✓ Added to request" : "+ Add to request"}
+          </button>
+        )}
       </div>
     </div>
   );

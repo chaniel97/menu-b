@@ -17,8 +17,17 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
     return `Hey babe 💕 I'd love if you could cook:\n${list}\n\nCan't wait to taste it! 😋`;
   }
 
+  async function logRequest() {
+    await fetch("/api/dishes/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: items.map((d) => d.id) }),
+    });
+  }
+
   async function handleCopy() {
     await navigator.clipboard.writeText(buildMessage());
+    await logRequest();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -26,6 +35,7 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
   async function handleShare() {
     if (navigator.share) {
       await navigator.share({ text: buildMessage() });
+      await logRequest();
     } else {
       handleCopy();
     }
