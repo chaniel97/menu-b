@@ -1,6 +1,13 @@
 "use client";
 
-const CATEGORIES = ["Breakfast", "Lunch", "Dinner", "Snack", "Dessert"];
+const CATEGORIES: { label: string; emoji: string }[] = [
+  { label: "All", emoji: "✨" },
+  { label: "Breakfast", emoji: "🌅" },
+  { label: "Lunch", emoji: "🥙" },
+  { label: "Dinner", emoji: "🍽️" },
+  { label: "Snack", emoji: "🍿" },
+  { label: "Dessert", emoji: "🍰" },
+];
 
 interface CategoryFilterProps {
   selected: string[];
@@ -9,10 +16,7 @@ interface CategoryFilterProps {
 
 export default function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
   function toggle(cat: string) {
-    if (cat === "All") {
-      onChange([]);
-      return;
-    }
+    if (cat === "All") { onChange([]); return; }
     const next = selected.includes(cat)
       ? selected.filter((c) => c !== cat)
       : [...selected, cat];
@@ -23,29 +27,23 @@ export default function CategoryFilter({ selected, onChange }: CategoryFilterPro
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide px-4">
-      <button
-        onClick={() => toggle("All")}
-        className={`flex-shrink-0 px-4 py-1.5 rounded-pill text-sm font-medium transition-all ${
-          allActive
-            ? "bg-[#e8637a] text-white shadow-sm"
-            : "bg-white text-gray-500 border border-gray-200 hover:border-[#e8637a] hover:text-[#e8637a]"
-        }`}
-      >
-        All
-      </button>
-      {CATEGORIES.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => toggle(cat)}
-          className={`flex-shrink-0 px-4 py-1.5 rounded-pill text-sm font-medium transition-all ${
-            selected.includes(cat)
-              ? "bg-[#e8637a] text-white shadow-sm"
-              : "bg-white text-gray-500 border border-gray-200 hover:border-[#e8637a] hover:text-[#e8637a]"
-          }`}
-        >
-          {cat}
-        </button>
-      ))}
+      {CATEGORIES.map(({ label, emoji }) => {
+        const isActive = label === "All" ? allActive : selected.includes(label);
+        return (
+          <button
+            key={label}
+            onClick={() => toggle(label)}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-pill text-sm font-semibold transition-all ${
+              isActive
+                ? "bg-[#e8637a] text-white shadow-md scale-105"
+                : "bg-white text-gray-500 border border-gray-200 hover:border-[#e8637a] hover:text-[#e8637a]"
+            }`}
+          >
+            <span>{emoji}</span>
+            <span>{label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

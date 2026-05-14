@@ -51,7 +51,9 @@ export default function MenuPage() {
 
   function handleAddToOrder(dish: Dish) {
     setOrderItems((prev) =>
-      prev.find((d) => d.id === dish.id) ? prev : [...prev, dish]
+      prev.find((d) => d.id === dish.id)
+        ? prev.filter((d) => d.id !== dish.id)
+        : [...prev, dish]
     );
   }
 
@@ -97,11 +99,11 @@ export default function MenuPage() {
       <header className="sticky top-0 z-30 bg-[#fdf8f3]/90 backdrop-blur-md px-4 sm:px-6 pt-4 pb-3 border-b border-[#f0e4d8]">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="font-playfair text-2xl font-bold text-gray-800 leading-tight">
-              MenuB
+            <h1 className="font-playfair text-2xl font-bold leading-tight bg-gradient-to-r from-[#e8637a] to-[#c8953a] bg-clip-text text-transparent">
+              🍴 MenuB
             </h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              {dishes.length} {dishes.length === 1 ? "dish" : "dishes"} saved
+              {dishes.length} {dishes.length === 1 ? "dish" : "dishes"} saved ✨
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -123,7 +125,7 @@ export default function MenuPage() {
             {!selectMode && orderItems.length > 0 && (
               <button
                 onClick={() => setShowOrder(true)}
-                className="flex items-center gap-1.5 bg-[#e8637a] text-white text-sm font-semibold px-3.5 py-2 rounded-pill shadow-fab hover:bg-[#c94860] transition-colors"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-[#e8637a] to-[#f07c8f] text-white text-sm font-bold px-3.5 py-2 rounded-pill shadow-fab hover:shadow-lg transition-all"
               >
                 <span>Order</span>
                 <span className="bg-white text-[#e8637a] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
@@ -200,7 +202,7 @@ export default function MenuPage() {
           <button
             onClick={() => setShowAdd(true)}
             style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
-            className="absolute right-4 sm:right-6 pointer-events-auto w-14 h-14 rounded-full bg-[#e8637a] text-white text-3xl flex items-center justify-center shadow-fab hover:bg-[#c94860] active:scale-95 transition-all"
+            className="absolute right-4 sm:right-6 pointer-events-auto w-14 h-14 rounded-full bg-gradient-to-br from-[#e8637a] to-[#f07c8f] text-white text-3xl flex items-center justify-center shadow-fab hover:shadow-xl active:scale-95 transition-all"
             aria-label="Add dish"
           >
             +
