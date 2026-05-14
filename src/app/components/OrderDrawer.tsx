@@ -46,8 +46,8 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-app bg-[#fdf8f3] rounded-t-[24px] max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+      <div className="w-full max-w-lg bg-[#fdf8f3] rounded-t-[24px] max-h-[80dvh] overflow-y-auto">
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-5 pb-3">
           <h2 className="font-playfair text-xl font-bold text-gray-800">Your request 💌</h2>
           <button
             onClick={onClose}
@@ -62,7 +62,7 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
             No dishes added yet. Tap <span className="font-semibold text-[#e8637a]">+ Add to request</span> on a dish!
           </div>
         ) : (
-          <div className="px-5 pb-8 flex flex-col gap-4">
+          <div className="px-4 sm:px-6 flex flex-col gap-4" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
             <ul className="flex flex-col gap-2">
               {items.map((dish) => (
                 <li

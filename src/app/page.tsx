@@ -88,9 +88,9 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh pb-28">
+    <div className="flex flex-col min-h-dvh" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom))" }}>
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#fdf8f3]/90 backdrop-blur-md px-4 pt-5 pb-3 border-b border-[#f0e4d8]">
+      <header className="sticky top-0 z-30 bg-[#fdf8f3]/90 backdrop-blur-md px-4 sm:px-6 pt-4 pb-3 border-b border-[#f0e4d8]">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="font-playfair text-2xl font-bold text-gray-800 leading-tight">
@@ -153,7 +153,7 @@ export default function MenuPage() {
       </header>
 
       {/* Grid */}
-      <main className="flex-1 px-4 pt-4">
+      <main className="flex-1 px-4 sm:px-6 pt-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 mt-20 text-gray-400">
             <span className="text-4xl animate-pulse">🍳</span>
@@ -172,7 +172,7 @@ export default function MenuPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filtered.map((dish) => (
               <DishCard
                 key={dish.id}
@@ -191,10 +191,11 @@ export default function MenuPage() {
 
       {/* FAB */}
       {!selectMode && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app pointer-events-none z-40">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg pointer-events-none z-40">
           <button
             onClick={() => setShowAdd(true)}
-            className="absolute bottom-6 right-4 pointer-events-auto w-14 h-14 rounded-full bg-[#e8637a] text-white text-3xl flex items-center justify-center shadow-fab hover:bg-[#c94860] active:scale-95 transition-all"
+            style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+            className="absolute right-4 sm:right-6 pointer-events-auto w-14 h-14 rounded-full bg-[#e8637a] text-white text-3xl flex items-center justify-center shadow-fab hover:bg-[#c94860] active:scale-95 transition-all"
             aria-label="Add dish"
           >
             +
@@ -204,7 +205,9 @@ export default function MenuPage() {
 
       {/* Bulk delete bar */}
       {selectMode && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app z-40 px-4 pb-6 pt-3 bg-gradient-to-t from-[#fdf8f3] to-transparent">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-40 px-4 sm:px-6 pt-3 bg-gradient-to-t from-[#fdf8f3] to-transparent"
+          style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+        >
           <button
             disabled={selectedIds.size === 0}
             onClick={() => setPendingBulkDelete(true)}

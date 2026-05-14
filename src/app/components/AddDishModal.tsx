@@ -80,8 +80,8 @@ export default function AddDishModal({ onClose, onAdded }: AddDishModalProps) {
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-app bg-[#fdf8f3] rounded-t-[24px] max-h-[92vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+      <div className="w-full max-w-lg bg-[#fdf8f3] rounded-t-[24px] max-h-[92dvh] overflow-y-auto">
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-5 pb-3">
           <h2 className="font-playfair text-xl font-bold text-gray-800">Add a new dish</h2>
           <button
             onClick={onClose}
@@ -91,7 +91,7 @@ export default function AddDishModal({ onClose, onAdded }: AddDishModalProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-5 pb-8 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="px-4 sm:px-6 flex flex-col gap-4" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
           {/* Photo */}
           <div
             onClick={() => fileRef.current?.click()}
