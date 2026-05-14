@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import StarRating from "./StarRating";
 
 export interface Dish {
@@ -56,13 +55,8 @@ export default function DishCard({
     >
       <div className="relative w-full h-44 bg-[#f5ede3]">
         {dish.photoPath ? (
-          <Image
-            src={dish.photoPath}
-            alt={dish.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 420px) 100vw, 420px"
-          />
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={dish.photoPath} alt={dish.name} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-5xl select-none">
             🍽️

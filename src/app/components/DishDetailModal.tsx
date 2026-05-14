@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
 import StarRating from "./StarRating";
 import ConfirmModal from "./ConfirmModal";
 import { Dish } from "./DishCard";
@@ -28,6 +27,33 @@ interface DishDetailModalProps {
   onDeleted: (id: number) => void;
 }
 
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const MAX = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round((h * MAX) / w); w = MAX; }
+          else { w = Math.round((w * MAX) / h); h = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
+      };
+      img.src = e.target!.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }: DishDetailModalProps) {
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -39,25 +65,20 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
   const [cuisine, setCuisine] = useState(dish.cuisine ?? "");
   const [rating, setRating] = useState(dish.rating);
   const [notes, setNotes] = useState(dish.notes ?? "");
-  const [photoPath, setPhotoPath] = useState(dish.photoPath ?? "");
-  const [preview, setPreview] = useState<string | null>(dish.photoPath ?? null);
-  const [uploading, setUploading] = useState(false);
+  const [photoData, setPhotoData] = useState<string | null>(dish.photoPath ?? null);
+  const [compressing, setCompressing] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPreview(URL.createObjectURL(file));
-    setUploading(true);
+    setCompressing(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.path) setPhotoPath(data.path);
+      const compressed = await compressImage(file);
+      setPhotoData(compressed);
     } finally {
-      setUploading(false);
+      setCompressing(false);
     }
   }
 
@@ -71,7 +92,7 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
         body: JSON.stringify({
           name, description, category,
           cuisine: cuisine || null,
-          rating, photoPath: photoPath || null, notes,
+          rating, photoPath: photoData || null, notes,
         }),
       });
       const updated = await res.json();
@@ -104,7 +125,8 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
               {/* Photo */}
               <div className="relative w-full h-56 bg-[#f5ede3] rounded-t-[24px] overflow-hidden">
                 {dish.photoPath ? (
-                  <Image src={dish.photoPath} alt={dish.name} fill className="object-cover" sizes="(max-width: 512px) 100vw, 512px" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={dish.photoPath} alt={dish.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-6xl">🍽️</div>
                 )}
@@ -191,17 +213,18 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
                   onClick={() => fileRef.current?.click()}
                   className="relative w-full h-40 rounded-card bg-[#f5ede3] border-2 border-dashed border-[#e8c4b0] flex items-center justify-center cursor-pointer overflow-hidden hover:border-[#e8637a] transition-colors"
                 >
-                  {preview ? (
-                    <Image src={preview} alt="preview" fill className="object-cover" sizes="512px" />
+                  {photoData ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoData} alt="preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="flex flex-col items-center gap-1 text-[#c8953a]">
                       <span className="text-3xl">📷</span>
                       <span className="text-sm font-medium">Tap to change photo</span>
                     </div>
                   )}
-                  {uploading && (
+                  {compressing && (
                     <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                      <span className="text-sm text-[#e8637a] font-medium">Uploading…</span>
+                      <span className="text-sm text-[#e8637a] font-medium">Processing…</span>
                     </div>
                   )}
                 </div>

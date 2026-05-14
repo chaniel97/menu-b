@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Dish } from "./DishCard";
 
 interface OrderDrawerProps {
@@ -70,9 +69,10 @@ export default function OrderDrawer({ items, onRemove, onClose }: OrderDrawerPro
                   key={dish.id}
                   className="flex items-center gap-3 bg-white rounded-card px-3 py-2.5 shadow-card"
                 >
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#f5ede3]">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#f5ede3]">
                     {dish.photoPath ? (
-                      <Image src={dish.photoPath} alt={dish.name} fill className="object-cover" sizes="48px" />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={dish.photoPath} alt={dish.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xl">🍽️</div>
                     )}
