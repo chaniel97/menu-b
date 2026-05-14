@@ -260,7 +260,9 @@ export default function MenuPage() {
       {activeDish && (
         <DishDetailModal
           dish={activeDish}
+          inOrder={!!orderItems.find((d) => d.id === activeDish.id)}
           onClose={() => setActiveDish(null)}
+          onAddToOrder={handleAddToOrder}
           onUpdated={(updated) => {
             setDishes((prev) => prev.map((d) => d.id === updated.id ? updated : d));
             setActiveDish(updated);

@@ -22,9 +22,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 interface DishDetailModalProps {
   dish: Dish;
+  inOrder: boolean;
   onClose: () => void;
   onUpdated: (dish: Dish) => void;
   onDeleted: (id: number) => void;
+  onAddToOrder: (dish: Dish) => void;
 }
 
 function compressImage(file: File): Promise<string> {
@@ -54,7 +56,7 @@ function compressImage(file: File): Promise<string> {
   });
 }
 
-export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }: DishDetailModalProps) {
+export default function DishDetailModal({ dish, inOrder, onClose, onUpdated, onDeleted, onAddToOrder }: DishDetailModalProps) {
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -176,18 +178,29 @@ export default function DishDetailModal({ dish, onClose, onUpdated, onDeleted }:
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-3 mt-5">
+                <button
+                  onClick={() => onAddToOrder(dish)}
+                  className={`w-full mt-5 py-3 rounded-card font-semibold text-sm transition-all ${
+                    inOrder
+                      ? "bg-[#f9d5db] text-[#c94860] border border-[#e8637a]"
+                      : "bg-[#e8637a] text-white hover:bg-[#c94860] shadow-fab"
+                  }`}
+                >
+                  {inOrder ? "✓ Added to request" : "+ Add to request"}
+                </button>
+
+                <div className="flex gap-3 mt-3">
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="flex-1 py-3 rounded-card border-2 border-red-200 text-red-500 font-semibold text-sm hover:bg-red-50 transition-colors"
+                    className="flex-1 py-2 rounded-card text-red-400 text-sm font-medium hover:text-red-600 transition-colors"
                   >
                     Delete
                   </button>
                   <button
                     onClick={() => setEditing(true)}
-                    className="flex-2 flex-grow-[2] py-3 rounded-card bg-[#e8637a] text-white font-semibold text-sm hover:bg-[#c94860] transition-colors shadow-fab"
+                    className="flex-1 py-2 rounded-card border border-gray-200 text-gray-500 text-sm font-medium hover:border-gray-300 hover:text-gray-700 transition-colors"
                   >
-                    Edit dish
+                    Edit
                   </button>
                 </div>
               </div>
